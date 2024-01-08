@@ -62,6 +62,39 @@ public:
     };
 
 public:
+    http_conn() {}
+    ~http_conn() {}
+
+public:
+    // 接口函数
+    void init(int sockfd, const sockaddr_in& addr, int TRIGMode);
+    void close_conn(bool real_close = true);
+    void process();
+    bool read_once(); // 注意LT模式和ET模式读取的区别
+    bool write();
+
+private:
+    void init();
+    HTTP_CODE process_read();
+    bool process_write(HTTP_CODE ret);
+
+    HTTP_CODE parse_request_line(char* text);
+    HTTP_CODE parse_headers(char* text);
+    HTTP_CODE parse_content(char* text);
+    HTTP_CODE do_request();
+    char* get_line() { return m_read_buf + m_start_line; }
+    LINE_STATUS parse_line();
+
+    void unmap();
+    bool add_response(const char* format, ...);
+    bool add_content(const char* content);
+    bool add_status_line(int status, const char* title);
+    bool add_headers(int content_length);
+    bool add_content_length(int content_length);
+    bool add_linger();
+    bool add_blank_line();
+
+public:
     static int m_epollfd;
     static int m_user_count;
 
@@ -90,6 +123,10 @@ private:
     struct stat m_file_stat;
     struct iovec m_iv[2];
     int m_iv_count;
+
+    int cgi;    // 是否启用的POST
+
+    int m_TRIGMode; // ET or LT
 };
 
 #endif
