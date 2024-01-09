@@ -62,8 +62,8 @@ public:
     };
 
 public:
-    http_conn() {}
-    ~http_conn() {}
+    http_conn() { }
+    ~http_conn() { }
 
 public:
     // 接口函数
@@ -114,17 +114,18 @@ private:
 
     char m_real_file[FILENAME_LEN];
     char* m_url;
-    char *m_version;
-    char *m_host;
-    int m_content_length;;
+    char* m_version;
+    char* m_host;
+    long m_content_length;
     bool m_linger;
 
-    char *m_file_address;
+    char* m_file_address;
     struct stat m_file_stat;
     struct iovec m_iv[2];
     int m_iv_count;
 
-    int cgi;    // 是否启用的POST
+    int cgi; // 是否启用的POST
+    char* m_string; // 存储HTTP请求的消息体
 
     int m_TRIGMode; // ET or LT
 };
