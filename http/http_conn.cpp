@@ -1,11 +1,8 @@
 #include "http_conn.h"
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
-#include <strings.h>
-#include <sys/epoll.h>
-#include <sys/mman.h>
+#include <mysql/mysql.h>
+#include <map>
+#include <string>
 
 // 定义HTTP响应的一些状态信息
 const char* ok_200_title = "OK";
@@ -19,6 +16,12 @@ const char* error_500_title = "Internal Error";
 
 // 网站的根目录
 const char* doc_root = "root";
+
+// 互斥锁,用于数据库
+locker m_lock;
+std::map<std::string, std::string> users; // 从数据库中读取的用户名和密码
+
+// 连接数据库并读取所有用户名和密码
 
 int setnonblocking(int fd)
 {
@@ -311,9 +314,51 @@ http_conn::HTTP_CODE http_conn::do_request()
     int len = strlen(doc_root);
     const char* p = strrchr(m_url, '/');
     
-    // 处理cgi
+    // 处理cgi，注册和登录
     if (cgi == 1 && (*(p + 1) == '2') || *(p + 1) == '3') {
+        // // 将url中的2或3去除
+        // strncpy(m_real_file + len, "/", 1);
+        // strncpy(m_real_file + len + 1, m_url + 2, strlen(m_url) - 2);
+        // 这一段没有意义了,因为处理注册和登录后url也会发生改变,这一段逻辑处理发生在后续的if else语句中
 
+        // 提取用户名和密码
+        // user=123&password=123
+        char name[100], password[100];
+        int i;
+        for (i = 5; m_string[i] != '&'; ++i) {
+            name[i - 5] = m_string[i];
+        }
+        name[i - 5] = '\0';
+        int j = 0;
+        for (i = i + 10; m_string[i] != '\0'; ++i, ++j) {
+            password[j] = m_string[i];
+        }
+        password[j] = '\0';
+
+        if (*(p + 1) == '3') {
+            // 注册事件处理
+            char* sql_insert = (char*) malloc(sizeof(char) * 200);
+            strcpy(sql_insert, "INSERT INTO user(username, password) VALUES(");
+            strcat(sql_insert, "'");
+            strcat(sql_insert, name);
+            strcat(sql_insert, "', '");
+            strcat(sql_insert, password);
+            strcat(sql_insert, ")");
+
+            if (users.find(name) == users.end()) {
+                m_lock.lock();
+                int res = mysql_query(mysql, sql_insert);
+                users.insert(std::pair<std::string, std::string>(name, password));
+                m_lock.unlock();
+
+                if (!res) 
+                    strcpy(m_url, "/log.html");
+                else
+                    strcpy(m_url, "/registerError.html");
+            }
+        } else if (*(p + 1) == '2') {
+            // 登录事件处理
+        }
     }
 
 

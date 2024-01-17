@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <mysql/mysql.h>
 
 #include "../lock/locker.h"
 
@@ -72,6 +73,7 @@ public:
     void process();
     bool read_once(); // 注意LT模式和ET模式读取的区别
     bool write();
+    // 连接数据库,并初始化结果
 
 private:
     void init();
@@ -97,6 +99,7 @@ private:
 public:
     static int m_epollfd;
     static int m_user_count;
+    MYSQL* mysql;       // 数据库连接句柄,用于保存数据库连接状态
 
 private:
     int m_sockfd;
