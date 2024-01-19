@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/uio.h>
 #include <unistd.h>
 #include <mysql/mysql.h>
 
@@ -129,6 +130,8 @@ private:
 
     int cgi; // 是否启用的POST
     char* m_string; // 存储HTTP请求的消息体
+    int bytes_to_send;
+    int bytes_have_send;
 
     int m_TRIGMode; // ET or LT
 };
