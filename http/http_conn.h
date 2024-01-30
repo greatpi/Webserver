@@ -22,6 +22,8 @@
 #include <mysql/mysql.h>
 
 #include "../lock/locker.h"
+#include "../log/log.h"
+#include "../CGImysql/sql_connection_pool.h"
 
 // 线程池的模板参数类，用于解析HTTP请求
 // 主从状态机实现
@@ -75,6 +77,7 @@ public:
     bool read_once(); // 注意LT模式和ET模式读取的区别
     bool write();
     // 连接数据库,并初始化结果
+    void initmysql_result(connection_pool* connPool);
 
 private:
     void init();
@@ -135,6 +138,10 @@ private:
 
     int m_TRIGMode; // ET or LT
     int m_close_log; // 日志开关
+
+    char sql_user[100];
+    char sql_passwd[100];
+    char sql_name[100];
 };
 
 #endif
