@@ -1,4 +1,5 @@
 #include "http_conn.h"
+#include "../log/log.h"
 #include <cstdarg>
 #include <cstring>
 #include <map>
@@ -235,7 +236,7 @@ http_conn::HTTP_CODE http_conn::parse_headers(char* text)
         m_host = text;
     } else {
         // 打印日志，未知头部信息
-        printf("oop! unknow header %s\n", text);
+        LOG_INFO("oop!unknow header: %s", text);
     }
     return NO_REQUEST;
 }
@@ -264,9 +265,7 @@ http_conn::HTTP_CODE http_conn::process_read()
         text = get_line();
         m_start_line = m_checked_idx;
         // 打印日志，获取的请求内容
-        // 当消息体未读取完毕时，将多次打印
-        printf("got 1 http line: %s\n", text);
-
+        LOG_INFO("%s", text);
         switch (m_check_state) {
         case CHECK_STATE_REQUESTLINE: {
             ret = parse_request_line(text);
@@ -474,6 +473,7 @@ bool http_conn::add_response(const char* format, ...)
     va_end(arg_list);
 
     // 打印日志
+    LOG_INFO("request:%s", m_write_buf);
 
     return true;
 }

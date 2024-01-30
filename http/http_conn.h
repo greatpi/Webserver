@@ -134,6 +134,7 @@ private:
     int bytes_have_send;
 
     int m_TRIGMode; // ET or LT
+    int m_close_log; // 日志开关
 };
 
 #endif
