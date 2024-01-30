@@ -120,10 +120,11 @@ connection_pool::~connection_pool()
     DestroyPool();
 }
 
-connectionRAII::connectionRAII(MYSQL* SQL, connection_pool* connPool) 
+connectionRAII::connectionRAII(MYSQL** SQL, connection_pool* connPool) 
 {
-    SQL = connPool->GetConnection();
-    conRAII = SQL;
+    *SQL = connPool->GetConnection();
+    conRAII = *SQL;
+    poolRAII = connPool;
 }
 
 connectionRAII::~connectionRAII()

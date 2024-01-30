@@ -45,7 +45,7 @@ public:
 
 class connectionRAII {
 public:
-    connectionRAII(MYSQL* SQL, connection_pool* connPool);
+    connectionRAII(MYSQL** SQL, connection_pool* connPool);
     ~connectionRAII();
 
 private:
