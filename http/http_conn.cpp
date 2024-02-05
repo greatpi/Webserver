@@ -132,6 +132,9 @@ void http_conn::init()
     m_read_idx = 0;
     m_write_idx = 0;
     cgi = 0;
+    m_state = 0;
+    timer_flag = 0;
+    improv = 0;
     memset(m_read_buf, '\0', READ_BUFFER_SIZE);
     memset(m_write_buf, '\0', WRITE_BUFFER_SIZE);
     memset(m_real_file, '\0', FILENAME_LEN);

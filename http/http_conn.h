@@ -104,6 +104,9 @@ public:
     static int m_epollfd;
     static int m_user_count;
     MYSQL* mysql;       // 数据库连接句柄,用于保存数据库连接状态
+    int timer_flag;      // 是否启用定时器
+    int improv;         // 是否已调用读写
+    int m_state;        // 读为0, 写为1, 用于reactor模式
 
 private:
     int m_sockfd;
