@@ -76,6 +76,9 @@ public:
     void process();
     bool read_once(); // 注意LT模式和ET模式读取的区别
     bool write();
+    sockaddr_in* get_address() {
+        return &m_address;
+    }
     // 连接数据库,并初始化结果
     void initmysql_result(connection_pool* connPool);
 
@@ -138,13 +141,14 @@ private:
     char* m_string; // 存储HTTP请求的消息体
     int bytes_to_send;
     int bytes_have_send;
+    // char* doc_root;
 
     int m_TRIGMode; // ET or LT
     int m_close_log; // 日志开关
 
-    char sql_user[100];
-    char sql_passwd[100];
-    char sql_name[100];
+    // char sql_user[100];
+    // char sql_passwd[100];
+    // char sql_name[100];
 };
 
 #endif
