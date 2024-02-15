@@ -1,5 +1,6 @@
 #include "http_conn.h"
 #include <cstdarg>
+#include <cstdio>
 #include <cstring>
 #include <map>
 #include <mysql/mysql.h>
@@ -19,7 +20,7 @@ const char* error_500_title = "Internal Error";
 const char* error_500_form = "There was an unusual problem serving the requested file.\n";
 
 // 网站的根目录
-const char* doc_root = "root";
+const char* doc_root = "../root";
 
 // 互斥锁,用于数据库
 locker m_lock;
@@ -120,6 +121,9 @@ void http_conn::init(int sockfd, const sockaddr_in& addr, int TRIGMode)
 
 void http_conn::init()
 {
+    mysql = NULL;
+    bytes_to_send = 0;
+    bytes_have_send = 0;
     m_check_state = CHECK_STATE_REQUESTLINE;
     m_linger = false;
     m_method = GET;
@@ -255,7 +259,7 @@ http_conn::HTTP_CODE http_conn::parse_headers(char* text)
         if (strcasecmp(text, "keep-alive") == 0) {
             m_linger = true;
         }
-    } else if (strncasecmp(text, "Content-Length", 15)) {
+    } else if (strncasecmp(text, "Content-length:", 15) == 0) {
         text += 15;
         text += strspn(text, " \t");
         m_content_length = atol(text);
@@ -454,9 +458,10 @@ bool http_conn::write()
 
     while (1) {
         temp = writev(m_sockfd, m_iv, m_iv_count);
+        std::cout << "temp = " << temp << std::endl;
         if (temp < 0) {
             if (errno == EAGAIN) {
-                modfd(m_epollfd, m_sockfd, EPOLLIN, m_TRIGMode);
+                modfd(m_epollfd, m_sockfd, EPOLLOUT, m_TRIGMode);
                 return true;
             }
             unmap();
@@ -468,9 +473,10 @@ bool http_conn::write()
         if (bytes_have_send >= m_iv[0].iov_len) {
             m_iv[0].iov_len = 0;
             m_iv[1].iov_base = m_file_address + (bytes_have_send - m_write_idx);
+            m_iv[1].iov_len = bytes_to_send;
         } else {
-            m_iv[0].iov_base = m_file_address + bytes_have_send;
-            m_iv[0].iov_len = bytes_to_send;
+            m_iv[0].iov_base = m_write_buf + bytes_have_send;
+            m_iv[0].iov_len = m_iv[0].iov_len - bytes_have_send;
         }
 
         if (bytes_to_send <= 0) {
@@ -524,7 +530,7 @@ bool http_conn::add_content_length(int content_len)
 
 bool http_conn::add_linger()
 {
-    return add_response("Connection: %s\r\n", (m_linger == true));
+    return add_response("Connection: %s\r\n", (m_linger == true) ? "keep-alive" : "close");
 }
 
 bool http_conn::add_blank_line()
@@ -533,7 +539,7 @@ bool http_conn::add_blank_line()
 }
 
 bool http_conn::add_content(const char* content)
-{
+{   
     return add_response("%s", content);
 }
 

@@ -309,10 +309,10 @@ void WebServer::dealwithwrite(int sockfd)
     } else {
         // proactor
         if (users[sockfd].write()) {
+            LOG_INFO("send data to the client(%s)", inet_ntoa(users[sockfd].get_address()->sin_addr));
             if (timer) {
                 adjust_timer(timer);
             }
-            LOG_INFO("send data to the client(%s)", inet_ntoa(users[sockfd].get_address()->sin_addr));
         } else {
             deal_timer(timer, sockfd);
         }

@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     server.trig_mode();
 
     server.eventListen();
-    std::cout << "Server is running" << std::endl;
+    
     server.eventLoop();
 
     return 0;
