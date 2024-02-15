@@ -32,7 +32,6 @@ void connection_pool::init(std::string url, std::string User, std::string PassWo
     for (int i = 0; i < MaxConn; ++i) {
         MYSQL* con = NULL;
         con = mysql_init(con);
-
         if (con == NULL) {
             LOG_ERROR("MySQL Error");
             exit(1);

@@ -29,6 +29,7 @@ std::map<std::string, std::string> users; // 从数据库中读取的用户名�
 void http_conn::initmysql_result(connection_pool* connPool)
 {
     // 先从连接池中取出一个连接
+    
     MYSQL* mysql = NULL;
     connectionRAII mysqlcon(&mysql, connPool);
 
@@ -36,7 +37,6 @@ void http_conn::initmysql_result(connection_pool* connPool)
     if (mysql_query(mysql, "SELECT username,passwd FROM user")) {
         LOG_ERROR("SELECT error:%s\n", mysql_error(mysql));
     }
-
     // 从表中检索完整的结果集
     MYSQL_RES* result = mysql_store_result(mysql);
 

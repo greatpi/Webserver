@@ -45,6 +45,7 @@ void WebServer::init(int port, std::string user, std::string passWord, std::stri
     m_user = user;
     m_passwd = passWord;
     m_sqlname = databaseName;
+    m_sql_num = sql_num;
     m_thread_num = thread_num;
     m_log_write = log_write;
     m_OPT_LINGER = opt_linger;
@@ -118,6 +119,8 @@ void WebServer::eventListen()
     int flag = 1;
     setsockopt(m_listenfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
     ret = bind(m_listenfd, (struct sockaddr*)&address, sizeof(address));
+    assert(ret >= 0);
+    ret = listen(m_listenfd, 5);
     assert(ret >= 0);
 
     utils.init(TIMESLOT);
